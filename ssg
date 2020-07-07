@@ -192,8 +192,9 @@ render_md_files_lowdown() {
 		-D html-skiphtml \
 		-d metadata \
         --html-no-head-ids \
+        --html-no-escapehtml \
 		-d autolink < "$1/$f" |
-		render_html_file "$3" \
+		render_html_file "$3" "$1/$f" \
 		> "$2/${f%\.md}.html"
 	done
 }
@@ -203,7 +204,7 @@ render_md_files_Markdown_pl() {
 	while read -r f
 	do
 		Markdown.pl < "$1/$f" |
-		render_html_file "$3" \
+		render_html_file "$3" "$1/$f" \
 		> "$2/${f%\.md}.html"
 	done
 }
@@ -211,7 +212,9 @@ render_md_files_Markdown_pl() {
 
 render_html_file() {
 	# h/t Devin Teske
-	awk -v title="$1" '
+    lastmod=$(stat -c %Y "$2")
+    lastmod=$(date -d @"$lastmod")i
+	awk -v title="$1" -v moddate="$lastmod" '
 	{ body = body "\n" $0 }
 	END {
 		body = substr(body, 2)
@@ -223,7 +226,7 @@ render_html_file() {
 			t = substr(body, RSTART + RLENGTH)
 			sub("<[[:space:]]*/[[:space:]]*[Hh]1.*", "", t)
 			gsub(/^[[:space:]]*|[[:space:]]$/, "", t)
-			if (t) title = t " &mdash; " title
+            if (t) title = t " &mdash; " title
 		}
 		n = split(ENVIRON["HEADER"], header, /\n/)
 	    for (i = 1; i <= n; i++) {
@@ -235,6 +238,11 @@ render_html_file() {
                 print "<title>"title"</title>"
             } else print header[i]
 		}
+
+        match(body,"(<[Hh]1>.*</[Hh]1>)",h1title)
+        print h1title[0]
+        sub("(<[Hh]1>.*</[Hh]1>)","<div class=\"updatedTime\">(Updated "moddate")</div>",body)
+
 		print body
 		print ENVIRON["FOOTER"]
 	}'
