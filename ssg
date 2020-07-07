@@ -191,6 +191,7 @@ render_md_files_lowdown() {
 		lowdown \
 		-D html-skiphtml \
 		-d metadata \
+        --html-no-head-ids \
 		-d autolink < "$1/$f" |
 		render_html_file "$3" \
 		> "$2/${f%\.md}.html"
@@ -225,18 +226,19 @@ render_html_file() {
 			if (t) title = t " &mdash; " title
 		}
 		n = split(ENVIRON["HEADER"], header, /\n/)
-		for (i = 1; i <= n; i++) {
+	    for (i = 1; i <= n; i++) {
 			if (match(tolower(header[i]), "<title></title>")) {
 				head = substr(header[i], 1, RSTART - 1)
 				tail = substr(header[i], RSTART + RLENGTH)
 				print head "<title>" title "</title>" tail
-			} else print header[i]
+            } else if(match(body, /<[[:space:]]*[Hh]1(>|[[:space:]][^>]*>)/) && match(tolower(header[i]), "<title>.*</title>")){
+                print "<title>"title"</title>"
+            } else print header[i]
 		}
 		print body
 		print ENVIRON["FOOTER"]
 	}'
 }
-
 
 list_pages() {
 	cd "$1" && find -name '*.md' -type f -printf "%TY-%Tm-%Td %p\n" |
