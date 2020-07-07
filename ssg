@@ -245,7 +245,8 @@ render_html_file() {
 
 		print body
 		print ENVIRON["FOOTER"]
-	}'
+	}' #|
+    #sed -r 's/<a.*(href="http.*")>/<a \1 target="_blank" rel="nofollow">/' # Turns (probably) outgoing a links to open in new tab
 }
 
 list_pages() {
