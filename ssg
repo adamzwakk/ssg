@@ -212,8 +212,7 @@ render_md_files_Markdown_pl() {
 
 render_html_file() {
     # h/t Devin Teske
-    lastmod=$(stat -c %Y "$2")
-    lastmod=$(date -d @"$lastmod")
+    lastmod=$(date -d @$(stat -c %Y "$2"))
     awk -v title="$1" -v moddate="$lastmod" -v srcfile="$2" '
     { body = body "\n" $0 }
     END {
