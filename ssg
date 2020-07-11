@@ -222,7 +222,8 @@ render_html_file() {
             print body
             exit
         }
-        if (!match(srcfile,"/\\./index.md") && match(body, /<[[:space:]]*[Hh]1(>|[[:space:]][^>]*>)/)) {
+        skiph1s = match(srcfile,"/\\./index.md") || match(srcfile,"/\\./404.md")
+        if (!skiph1s && match(body, /<[[:space:]]*[Hh]1(>|[[:space:]][^>]*>)/)) {
             t = substr(body, RSTART + RLENGTH)
             sub("<[[:space:]]*/[[:space:]]*[Hh]1.*", "", t)
             gsub(/^[[:space:]]*|[[:space:]]$/, "", t)
@@ -239,7 +240,8 @@ render_html_file() {
             } else print header[i]
         }
 
-        if(!match(srcfile,"/\\./index.md")){
+        # Add updated time under h1 tags
+        if(!skiph1s){
             match(body,"(<[Hh]1>.*</[Hh]1>)",h1title)
             print h1title[0]
             sub("(<[Hh]1>.*</[Hh]1>)","<div class=\"updatedTime\">(Updated "moddate")</div>",body)
@@ -247,8 +249,7 @@ render_html_file() {
 
         print body
         print ENVIRON["FOOTER"]
-    }' #|
-    #sed -r 's/<a.*(href="http.*")>/<a \1 target="_blank" rel="nofollow">/' # Turns (probably) outgoing a links to open in new tab
+    }'
 }
 
 
