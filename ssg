@@ -211,43 +211,46 @@ render_md_files_Markdown_pl() {
 
 
 render_html_file() {
-	# h/t Devin Teske
+    # h/t Devin Teske
     lastmod=$(stat -c %Y "$2")
     lastmod=$(date -d @"$lastmod")i
-	awk -v title="$1" -v moddate="$lastmod" '
-	{ body = body "\n" $0 }
-	END {
-		body = substr(body, 2)
-		if (body ~ /<[Hh][Tt][Mm][Ll]/) {
-			print body
-			exit
-		}
-		if (match(body, /<[[:space:]]*[Hh]1(>|[[:space:]][^>]*>)/)) {
-			t = substr(body, RSTART + RLENGTH)
-			sub("<[[:space:]]*/[[:space:]]*[Hh]1.*", "", t)
-			gsub(/^[[:space:]]*|[[:space:]]$/, "", t)
+    awk -v title="$1" -v moddate="$lastmod" -v srcfile="$2" '
+    { body = body "\n" $0 }
+    END {
+        body = substr(body, 2)
+        if (body ~ /<[Hh][Tt][Mm][Ll]/) {
+            print body
+            exit
+        }
+        if (match(body, /<[[:space:]]*[Hh]1(>|[[:space:]][^>]*>)/) && !match(srcfile,"/\\./index.md")) {
+            t = substr(body, RSTART + RLENGTH)
+            sub("<[[:space:]]*/[[:space:]]*[Hh]1.*", "", t)
+            gsub(/^[[:space:]]*|[[:space:]]$/, "", t)
             if (t) title = t " &mdash; " title
-		}
-		n = split(ENVIRON["HEADER"], header, /\n/)
-	    for (i = 1; i <= n; i++) {
-			if (match(tolower(header[i]), "<title></title>")) {
-				head = substr(header[i], 1, RSTART - 1)
-				tail = substr(header[i], RSTART + RLENGTH)
-				print head "<title>" title "</title>" tail
+        }
+        n = split(ENVIRON["HEADER"], header, /\n/)
+        for (i = 1; i <= n; i++) {
+            if (match(tolower(header[i]), "<title></title>")) {
+                head = substr(header[i], 1, RSTART - 1)
+                tail = substr(header[i], RSTART + RLENGTH)
+                print head "<title>" title "</title>" tail
             } else if(match(body, /<[[:space:]]*[Hh]1(>|[[:space:]][^>]*>)/) && match(tolower(header[i]), "<title>.*</title>")){
                 print "<title>"title"</title>"
             } else print header[i]
-		}
+        }
 
-        match(body,"(<[Hh]1>.*</[Hh]1>)",h1title)
-        print h1title[0]
-        sub("(<[Hh]1>.*</[Hh]1>)","<div class=\"updatedTime\">(Updated "moddate")</div>",body)
+        if(!match(srcfile,"/\\./index.md")){
+            match(body,"(<[Hh]1>.*</[Hh]1>)",h1title)
+            print h1title[0]
+            sub("(<[Hh]1>.*</[Hh]1>)","<div class=\"updatedTime\">(Updated "moddate")</div>",body)
+        }
 
-		print body
-		print ENVIRON["FOOTER"]
-	}' #|
+        print body
+        print ENVIRON["FOOTER"]
+    }' #|
     #sed -r 's/<a.*(href="http.*")>/<a \1 target="_blank" rel="nofollow">/' # Turns (probably) outgoing a links to open in new tab
 }
+
 
 list_pages() {
 	cd "$1" && find -name '*.md' -type f -printf "%TY-%Tm-%Td %p\n" |
