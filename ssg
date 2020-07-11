@@ -222,7 +222,7 @@ render_html_file() {
             print body
             exit
         }
-        if (match(body, /<[[:space:]]*[Hh]1(>|[[:space:]][^>]*>)/) && !match(srcfile,"/\\./index.md")) {
+        if (!match(srcfile,"/\\./index.md") && match(body, /<[[:space:]]*[Hh]1(>|[[:space:]][^>]*>)/)) {
             t = substr(body, RSTART + RLENGTH)
             sub("<[[:space:]]*/[[:space:]]*[Hh]1.*", "", t)
             gsub(/^[[:space:]]*|[[:space:]]$/, "", t)
@@ -234,7 +234,7 @@ render_html_file() {
                 head = substr(header[i], 1, RSTART - 1)
                 tail = substr(header[i], RSTART + RLENGTH)
                 print head "<title>" title "</title>" tail
-            } else if(match(body, /<[[:space:]]*[Hh]1(>|[[:space:]][^>]*>)/) && match(tolower(header[i]), "<title>.*</title>")){
+            } else if(title != "" && match(body, /<[[:space:]]*[Hh]1(>|[[:space:]][^>]*>)/) && match(tolower(header[i]), "<title>.*</title>")){
                 print "<title>"title"</title>"
             } else print header[i]
         }
@@ -250,6 +250,7 @@ render_html_file() {
     }' #|
     #sed -r 's/<a.*(href="http.*")>/<a \1 target="_blank" rel="nofollow">/' # Turns (probably) outgoing a links to open in new tab
 }
+
 
 
 list_pages() {
