@@ -254,7 +254,7 @@ render_html_file() {
 
 
 list_pages() {
-	cd "$1" && find -name '*.md' -type f -printf "%TY-%Tm-%Td %p\n" |
+	cd "$1" && find -name '*.md' -not -name '404.md' -type f -printf "%TY-%Tm-%Td %p\n" |
 	sed 's#./##;s#.md$#.html#;s#/index.html$#/#'
 }
 
