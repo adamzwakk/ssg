@@ -189,11 +189,9 @@ render_md_files_lowdown() {
 	while read -r f
 	do
 		lowdown \
-		-D html-skiphtml \
-		-d metadata \
         --html-no-head-ids \
         --html-no-escapehtml \
-		-d autolink < "$1/$f" |
+		 < "$1/$f" |
 		render_html_file "$3" "$1/$f" \
 		> "$2/${f%\.md}.html"
 	done
