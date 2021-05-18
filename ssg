@@ -191,6 +191,7 @@ render_md_files_lowdown() {
 		lowdown \
         --html-no-head-ids \
         --html-no-escapehtml \
+	--html-no-skiphtml \
 		 < "$1/$f" |
 		render_html_file "$3" "$1/$f" \
 		> "$2/${f%\.md}.html"
