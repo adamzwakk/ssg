@@ -65,7 +65,12 @@ main() {
 
 		if echo "$fs" | grep -q '\.md$'
 		then
-			if test -x "$(which lowdown 2> /dev/null)"
+			if test -x "$(which pandoc 2> /dev/null)"
+			then
+				echo "Using pandoc"
+				echo "$fs" | grep '\.md$' |
+                                render_md_files_pandoc "$src" "$dst" "$title"
+			elif test -x "$(which lowdown 2> /dev/null)"
 			then
 				echo "$fs" | grep '\.md$' |
 				render_md_files_lowdown "$src" "$dst" "$title"
@@ -190,7 +195,7 @@ render_md_files_lowdown() {
 	do
 		lowdown \
         --html-no-head-ids \
-        --html-no-escapehtml \
+	--html-no-escapehtml \
 	--html-no-skiphtml \
 		 < "$1/$f" |
 		render_html_file "$3" "$1/$f" \
@@ -198,6 +203,14 @@ render_md_files_lowdown() {
 	done
 }
 
+render_md_files_pandoc() {
+	while read -r f
+	do
+		pandoc -f markdown_mmd < "$1/$f" | \
+			render_html_file "$3" "$1/$f" \
+			> "$2/${f%\.md}.html"	
+	done
+}
 
 render_md_files_Markdown_pl() {
 	while read -r f
