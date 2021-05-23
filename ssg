@@ -206,7 +206,7 @@ render_md_files_lowdown() {
 render_md_files_pandoc() {
 	while read -r f
 	do
-		pandoc -f markdown_mmd < "$1/$f" | \
+		pandoc -f markdown --from markdown-auto_identifiers --from markdown-implicit_figures < "$1/$f" | \
 			render_html_file "$3" "$1/$f" \
 			> "$2/${f%\.md}.html"	
 	done
